@@ -1,55 +1,25 @@
 import './style.css'
 
-// ship object:
-//   length -> squares taken up by ship
-//   hits -> how many times has been hit
-//   isSunk -> if hits === length 
-//   increaseHits -> hits++
+// SHIPS:
+// Carrier -> 5
+// Battleship -> 4
+// Destroyer -> 3
+// Submarine -> 3
+// Patrol Boat -> 2
 
-// gameboard object:
-//   10x10 squares
-//   createShip -> calls ship factory to create ship and passes in squares
-//   receiveAttack -> takes co-ordinates of strike.. deactivate square && if ship there, increase hit of ship
-//   board hits -> amount of successful hits taken
-//   gameOver -> if successful hits === amount of ship squares, end game and declare winner
-
-function createShip(boardIndex, length) {
-  return {
-    length: length,
-    location: boardIndex,
-    hits: 0,
-    increaseHits: function() {
-        this.hits++
-      },
-    isSunk: this.length === this.hits,
-  }
-}
-
-function createGameBoard() {
-  return {
-    board: [],
-    populateBoard: function() {
-      for (let i = 0; i < 100; i++) {
-        this.board[i] = 0
-      }
-    },
-    createShip: function(length, boardIndex, orientation) {
-      createShip(boardIndex, length)
-      if (orientation === 'horizontal') {
-        for (let i = boardIndex; i < boardIndex + length; i++){
-         this.board[i] = 1
-        }
-      }
-      if (orientation === 'vertical') {
-        for (let i = boardIndex; i < boardIndex + (length * 10); i + 10) {
-          this.board[i] = 1
-        }
-      }
-    },
-    boardHits: 0,
-    increaseBoardHits: function() {
-      this.boardHits++
-    },
-    isGameOver: this.boardHits === 17,
-  }
-}
+// gameBoard = {
+// board: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+//         0, 0, 1, X, X, 1, 1, 0, 0, 0,
+//         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+//         0, 0, M, 0, M, 0, 1, 0, 0, 0,
+//         0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+//         0, 1, 1, 1, 0, 0, 1, 0, 0, 0,
+//         0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+//         0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+//         0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+// ships: [{name: 'Carrier', length: 5, hits: 2, location: [12, 13, 14, 15, 16], isSunk: false},
+//         {name: 'Battleship', length: 4, hits: 0, location: [36, 46, 56, 66], isSunk: false},
+//         {name: 'Destroyer', length: 3, hits: 0, location: [51, 52, 53], isSunk: false},
+//         {name: 'Submarine', length: 3, hits: 0, location: [83, 84, 85], isSunk: false},
+//         {name: 'Patrol Boat', length: 2, hits: 0, location: [95, 96], isSunk: false},]
+//  }
