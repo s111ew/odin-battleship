@@ -1,4 +1,5 @@
-// import './style.css'
+import './style.css'
+import * as ui from './ui.js'
 
 // SHIPS:
 // Carrier -> 5
@@ -52,7 +53,7 @@ const createShip = (name, length, location) => {
   };
 };
 
-const createBoard = (player) => {
+export const createBoard = (player) => {
   return {
     board: new Array(BOARD_SIZE).fill(0),
     ships: [],
@@ -163,21 +164,19 @@ const createBoard = (player) => {
   };
 };
 
-const gameBoard = createBoard('Player 1');
-gameBoard.populateBoardWithShips();
-
-
-
-
+// const gameBoard = createBoard('Player 1');
+// gameBoard.populateBoardWithShips();
 
 //Test
-const displayBoardAsTable = () => {
-  let table = [];
-  for (let i = 0; i < gameBoard.board.length; i += 9) {
-    table.push(gameBoard.board.slice(i, i + 9));
-  }
-  console.table(table);
-  console.log(gameBoard.ships)
-}
+// const displayBoardAsTable = () => {
+//   let table = [];
+//   for (let i = 0; i < gameBoard.board.length; i += 9) {
+//     table.push(gameBoard.board.slice(i, i + 9));
+//   }
+//   console.table(table);
+//   console.log(gameBoard.ships)
+// }
 
-displayBoardAsTable()
+// displayBoardAsTable()
+
+window.onload = ui.initialiseStartButton()
