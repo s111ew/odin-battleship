@@ -65,6 +65,8 @@ const createGameBoard = () => {
 
     ships: [],
 
+    hitLocations: [],
+
     generateShips() {
       SHIPS.forEach(ship => {
         const newShip = createShip(ship.name, ship.length)
@@ -125,13 +127,22 @@ const createGameBoard = () => {
     },
 
     receiveHit(location) {
+      if (this.hitLocations.includes(location)) {
+        return
+      }
+
       const hitShip = this.checkLocation(location, this.ships)
+
       if (hitShip) {
         hitShip.increaseHits()
-        // IF SHIP HAS SUNK THEN ???
-      } else {
-        this.board[location] = 'm'
+
+        if (hitShip.isSunk()) {
+          const index = this.ships.indexOf(hitShip)
+          this.ships.splice(index, 1)
+        }
       }
+
+      this.hitLocations.push(location)
     },
 
     checkLocation(locationOfHit, ships, index = 0) {
