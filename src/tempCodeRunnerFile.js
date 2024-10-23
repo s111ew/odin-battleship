@@ -1,1 +1,0 @@
-getRandomNumberUpTo(81)
