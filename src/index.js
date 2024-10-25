@@ -1,5 +1,4 @@
 import "./style.css";
-import * as userInterface from "./interface.js";
 
 // SHIPS:
 // Carrier -> 5
@@ -27,7 +26,10 @@ import * as userInterface from "./interface.js";
 
 export const ROW_SIZE = 9;
 
-const ROW_STARTS = Array.from({ length: ROW_SIZE }, (_, i) => i * ROW_SIZE);
+const START_OF_EACH_ROW = Array.from(
+  { length: ROW_SIZE },
+  (_, i) => i * ROW_SIZE
+);
 
 const SHIPS = [
   { name: "Carrier", length: 5 },
@@ -67,6 +69,10 @@ const createGameBoard = () => {
 
     hitLocations: [],
 
+    hasLost() {
+      return !this.ships ? true : false;
+    },
+
     generateShips() {
       SHIPS.forEach((ship) => {
         const newShip = createShip(ship.name, ship.length);
@@ -101,7 +107,7 @@ const createGameBoard = () => {
 
     isLocationValidHorizontal(locationArray, board) {
       const locationStart = locationArray[0];
-      const filtered = ROW_STARTS.filter((num) => num <= locationStart);
+      const filtered = START_OF_EACH_ROW.filter((num) => num <= locationStart);
       const rowEnd = Math.max(...filtered) + 8;
 
       for (let location of locationArray) {
@@ -143,53 +149,78 @@ const createGameBoard = () => {
           const index = this.ships.indexOf(hitShip);
           this.ships.splice(index, 1);
         }
-      }
 
-      this.hitLocations.push(location);
+        this.hitLocations.push(location);
+      }
     },
 
-    checkLocation(locationOfHit, ships, index = 0) {
+    checkLocation(locationToCheck, ships, index = 0) {
       if (index >= ships.length) {
         return null;
       }
 
-      if (ships[index].location.includes(locationOfHit)) {
+      if (ships[index].location.includes(locationToCheck)) {
         return ships[index];
       }
 
-      return this.checkLocation(locationOfHit, ships, index + 1);
+      return this.checkLocation(locationToCheck, ships, index + 1);
     },
   };
 };
 
-const startGame = () => {
-  let turn = "player";
+const generateGrids = () => {
+  const gridContainers = document.querySelectorAll(".grid");
 
-  const playerBoard = createGameBoard();
-  playerBoard.generateShips();
+  gridContainers.forEach((gridContainer) => {
+    for (let i = 0; i < ROW_SIZE * ROW_SIZE; i++) {
+      const gridCell = document.createElement("div");
+      gridCell.classList.add("cell");
+      gridContainer.appendChild(gridCell);
+    }
+  });
+};
 
-  const cpuBoard = createGameBoard();
-  cpuBoard.generateShips();
+const initialiseStartButton = () => {
+  const startButton = document.querySelector(".start");
+  startButton.addEventListener("click", () => {
+    startButton.remove();
+    // startGame(); //PLAY GAME
+    generateGrids();
+    const playerBoard = createGameBoard();
+    playerBoard.generateShips();
+    renderPlayerShips(playerBoard);
+  });
+};
+
+const renderPlayerShips = (board) => {
+  const boardCells = document.querySelectorAll(".player-grid > div");
+
+  boardCells.forEach((cell, index) => {
+    const shipAtLocation = board.checkLocation(index, board.ships);
+    if (shipAtLocation) {
+      cell.classList.add(shipAtLocation.shipID);
+    }
+  });
 };
 
 window.onload = () => {
-  userInterface.initialiseStartButton();
+  initialiseStartButton();
 };
 
-//--------------TESTING OUTPUT---------------------------
+// --------------TESTING OUTPUT---------------------------
 
 // function displayBoard(board, chunkSize) {
-//     let result = [];
+//   let result = [];
 
-//     for (let i = 0; i < board.length; i += chunkSize) {
-//         result.push(board.slice(i, i + chunkSize));
-//     }
+//   for (let i = 0; i < board.length; i += chunkSize) {
+//     result.push(board.slice(i, i + chunkSize));
+//   }
 
-//     console.table(result)
+//   console.table(result);
 // }
 
-// const newGameBoard = createGameBoard()
-// newGameBoard.generateShips()
+// const newGameBoard = createGameBoard();
+// newGameBoard.generateShips();
 
-// displayBoard(newGameBoard.board, 9)
-// console.table(newGameBoard.ships)
+// displayBoard(newGameBoard.board, 9);
+// console.table(newGameBoard.ships);

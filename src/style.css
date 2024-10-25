@@ -104,3 +104,23 @@ main {
 .cpu-grid > div:hover {
   background-color: gray;
 }
+
+.c {
+  background-color: red !important;
+}
+
+.b {
+  background-color: green !important;
+}
+
+.d {
+  background-color: blue !important;
+}
+
+.s {
+  background-color: blueviolet !important;
+}
+
+.p {
+  background-color: yellow !important;
+}
