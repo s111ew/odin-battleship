@@ -182,6 +182,16 @@ const renderHit = (name, index, wasHit) => {
 
   const classToAdd = wasHit ? "hit" : "miss";
 
+  const possibleShipClasses = ['c', 'd', 'b', 's', 'p']
+
+  if (wasHit) {
+    possibleShipClasses.forEach(shipClass => {
+      if (cells[index].classList.contains(shipClass)) {
+        cells[index].classList.remove(shipClass)
+      }
+    })
+  }
+
   cells[index].classList.add(classToAdd);
 };
 
@@ -245,28 +255,21 @@ const addEventListenersToCpuBoard = (boards) => {
 const handleClickEvent = (index, boards) => {
   if (turn === "player") {
     let cpuBoard = boards[1];
-
     const hit = cpuBoard.receiveHit(index);
+    if (boards[1].hasLost()) {
+      endGame(boards[0]);
+      return;
+    }
 
     if (!hit) {
       turn = "cpu";
       cpuTurn(boards);
     }
-
-    checkWin(boards);
-  }
-};
-
-const checkWin = (boards) => {
-  if (boards[0].hasLost()) {
-    endGame(boards[0]);
-  } else if (boards[1].hasLost()) {
-    endGame(boards[1]);
   }
 };
 
 const endGame = (winningBoard) => {
-  const main = document.querySelector(".main");
+  const main = document.querySelector("main");
   const winningMessage = document.createElement("h1");
   winningMessage.textContent = `${winningBoard.name} has won!`;
   main.appendChild(winningMessage);
