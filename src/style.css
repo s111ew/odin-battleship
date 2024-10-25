@@ -105,6 +105,14 @@ main {
   background-color: gray;
 }
 
+.hit {
+  background-color: black !important;
+}
+
+.miss {
+  background-color: gray !important;
+}
+
 .c {
   background-color: red !important;
 }

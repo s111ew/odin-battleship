@@ -24,12 +24,14 @@ import "./style.css";
 //         {name: 'Patrol Boat', length: 2, hits: 0, location: [95, 96], isSunk: false}],
 //  }
 
-export const ROW_SIZE = 9;
+const ROW_SIZE = 9;
 
 const START_OF_EACH_ROW = Array.from(
   { length: ROW_SIZE },
   (_, i) => i * ROW_SIZE
 );
+
+let turn = "player";
 
 const SHIPS = [
   { name: "Carrier", length: 5 },
@@ -61,8 +63,10 @@ const createShip = (name, length) => {
   };
 };
 
-const createGameBoard = () => {
+const createGameBoard = (name) => {
   return {
+    name: name,
+
     board: new Array(ROW_SIZE * ROW_SIZE).fill(0),
 
     ships: [],
@@ -70,7 +74,7 @@ const createGameBoard = () => {
     hitLocations: [],
 
     hasLost() {
-      return !this.ships ? true : false;
+      return this.ships.length === 0;
     },
 
     generateShips() {
@@ -82,10 +86,7 @@ const createGameBoard = () => {
 
     generateShipLocation(shipObject) {
       const orientation = Math.random() > 0.5 ? "V" : "H";
-      const randomLocation = +(
-        Math.random() *
-        (ROW_SIZE * ROW_SIZE - 1)
-      ).toFixed(0);
+      const randomLocation = getRandomLocation();
       const locationArray = new Array(shipObject.length);
       locationArray[0] = randomLocation;
       for (let i = 1; i < shipObject.length; i++) {
@@ -151,7 +152,15 @@ const createGameBoard = () => {
         }
 
         this.hitLocations.push(location);
+
+        renderHit(this.name, location, true);
+
+        return true;
       }
+
+      renderHit(this.name, location, false);
+
+      return false;
     },
 
     checkLocation(locationToCheck, ships, index = 0) {
@@ -166,6 +175,14 @@ const createGameBoard = () => {
       return this.checkLocation(locationToCheck, ships, index + 1);
     },
   };
+};
+
+const renderHit = (name, index, wasHit) => {
+  const cells = document.querySelectorAll(`.${name}-grid > div`);
+
+  const classToAdd = wasHit ? "hit" : "miss";
+
+  cells[index].classList.add(classToAdd);
 };
 
 const generateGrids = () => {
@@ -184,23 +201,117 @@ const initialiseStartButton = () => {
   const startButton = document.querySelector(".start");
   startButton.addEventListener("click", () => {
     startButton.remove();
-    // startGame(); //PLAY GAME
-    generateGrids();
-    const playerBoard = createGameBoard();
-    playerBoard.generateShips();
-    renderPlayerShips(playerBoard);
+    startGame();
   });
 };
 
-const renderPlayerShips = (board) => {
-  const boardCells = document.querySelectorAll(".player-grid > div");
+const startGame = () => {
+  generateGrids();
+  const playerBoard = createGameBoard("player");
+  playerBoard.generateShips();
 
-  boardCells.forEach((cell, index) => {
-    const shipAtLocation = board.checkLocation(index, board.ships);
+  const cpuBoard = createGameBoard("cpu");
+  cpuBoard.generateShips();
+
+  let boards = [playerBoard, cpuBoard];
+
+  renderPlayerShips(boards);
+  addEventListenersToCpuBoard(boards);
+};
+
+const renderPlayerShips = (boards) => {
+  const playerBoard = boards[0];
+
+  const playerBoardCells = document.querySelectorAll(".player-grid > div");
+
+  playerBoardCells.forEach((cell, index) => {
+    const shipAtLocation = playerBoard.checkLocation(index, playerBoard.ships);
     if (shipAtLocation) {
       cell.classList.add(shipAtLocation.shipID);
     }
   });
+};
+
+const addEventListenersToCpuBoard = (boards) => {
+  const cpuBoardCells = document.querySelectorAll(".cpu-grid > div");
+
+  cpuBoardCells.forEach((cell, index) => {
+    cell.addEventListener("click", () => {
+      handleClickEvent(index, boards);
+    });
+  });
+};
+
+const handleClickEvent = (index, boards) => {
+  if (turn === "player") {
+    let cpuBoard = boards[1];
+
+    const hit = cpuBoard.receiveHit(index);
+
+    if (!hit) {
+      turn = "cpu";
+      cpuTurn(boards);
+    }
+
+    checkWin(boards);
+  }
+};
+
+const checkWin = (boards) => {
+  if (boards[0].hasLost()) {
+    endGame(boards[0]);
+  } else if (boards[1].hasLost()) {
+    endGame(boards[1]);
+  }
+};
+
+const endGame = (winningBoard) => {
+  const main = document.querySelector(".main");
+  const winningMessage = document.createElement("h1");
+  winningMessage.textContent = `${winningBoard.name} has won!`;
+  main.appendChild(winningMessage);
+
+  const cpuBoardCells = document.querySelectorAll(".cpu-grid > div");
+  cpuBoardCells.forEach((cell) => {
+    const clonedCell = cell.cloneNode(true);
+    cell.replaceWith(clonedCell);
+  });
+};
+
+const cpuTurn = (boards) => {
+  if (boards[0].hasLost()) {
+    endGame(boards[1]);
+    return;
+  }
+
+  let playerBoard = boards[0];
+  let hitLocation = findValidHitLocation(playerBoard);
+
+  const hit = playerBoard.receiveHit(hitLocation);
+
+  if (hit) {
+    if (boards[0].hasLost()) {
+      endGame(boards[1]);
+      return;
+    }
+    return cpuTurn(boards);
+  }
+
+  turn = "player";
+};
+
+const getRandomLocation = () => {
+  return Math.round(Math.random() * (ROW_SIZE * ROW_SIZE - 1));
+};
+
+const findValidHitLocation = (board) => {
+  let locationToTry;
+
+  do {
+    locationToTry = getRandomLocation();
+  } while (board.hitLocations.includes(locationToTry));
+
+  return locationToTry;
 };
 
 window.onload = () => {
