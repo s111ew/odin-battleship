@@ -288,35 +288,37 @@ const endGame = (winningBoard) => {
 };
 
 const cpuTurn = (boards) => {
-  const playerBoard = boards[0];
-
-  if (playerBoard.hasLost()) {
-    endGame(boards[1]);
-    return;
-  }
-
-  let hitLocation;
-
-  if (playerBoard.potentialTargets.length > 0) {
-    hitLocation = playerBoard.potentialTargets.shift();
-  } else {
-    hitLocation = findValidHitLocation(playerBoard);
-  }
-
-  const hit = playerBoard.receiveHit(hitLocation);
-
-  if (hit) {
-    playerBoard.addAdjacentCells(hitLocation);
+  setTimeout(() => {
+    const playerBoard = boards[0];
 
     if (playerBoard.hasLost()) {
       endGame(boards[1]);
       return;
     }
-    return cpuTurn(boards);
-  }
 
-  playerBoard.potentialTargets = [];
-  turn = "player";
+    let hitLocation;
+
+    if (playerBoard.potentialTargets.length > 0) {
+      hitLocation = playerBoard.potentialTargets.shift();
+    } else {
+      hitLocation = findValidHitLocation(playerBoard);
+    }
+
+    const hit = playerBoard.receiveHit(hitLocation);
+
+    if (hit) {
+      playerBoard.addAdjacentCells(hitLocation);
+
+      if (playerBoard.hasLost()) {
+        endGame(boards[1]);
+        return;
+      }
+      return cpuTurn(boards);
+    }
+
+    playerBoard.potentialTargets = [];
+    turn = "player";
+  }, 700);
 };
 
 const getRandomLocation = () => {
@@ -341,7 +343,5 @@ window.onload = () => {
 };
 
 //TODO
-
-// IMPROVE CPU AI TO CHECK FOR NEARBY BOATS
 
 // TIMEOUT BETWEEN CPU TURNS
