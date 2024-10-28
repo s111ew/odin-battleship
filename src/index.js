@@ -49,6 +49,8 @@ const createGameBoard = (name) => {
 
     hitLocations: [],
 
+    potentialTargets: [],
+
     hasLost() {
       return this.ships.length === 0;
     },
@@ -149,6 +151,34 @@ const createGameBoard = (name) => {
       }
 
       return this.checkLocation(locationToCheck, ships, index + 1);
+    },
+
+    addAdjacentCells(hitLocation) {
+      const adjacentOffsets = [-1, 1, -ROW_SIZE, ROW_SIZE];
+
+      adjacentOffsets.forEach((offset) => {
+        const adjacentLocation = hitLocation + offset;
+
+        if (
+          adjacentLocation >= 0 &&
+          adjacentLocation < ROW_SIZE * ROW_SIZE &&
+          !this.hitLocations.includes(adjacentLocation) &&
+          !this.potentialTargets.includes(adjacentLocation) &&
+          this.isValidAdjacent(hitLocation, adjacentLocation)
+        ) {
+          this.potentialTargets.push(adjacentLocation);
+        }
+      });
+    },
+
+    isValidAdjacent(hitLocation, adjacentLocation) {
+      const hitRow = Math.floor(hitLocation / ROW_SIZE);
+      const adjacentRow = Math.floor(adjacentLocation / ROW_SIZE);
+
+      if (Math.abs(hitLocation - adjacentLocation) === 1) {
+        return hitRow === adjacentRow;
+      }
+      return true;
     },
   };
 };
@@ -258,24 +288,34 @@ const endGame = (winningBoard) => {
 };
 
 const cpuTurn = (boards) => {
-  if (boards[0].hasLost()) {
+  const playerBoard = boards[0];
+
+  if (playerBoard.hasLost()) {
     endGame(boards[1]);
     return;
   }
 
-  let playerBoard = boards[0];
-  let hitLocation = findValidHitLocation(playerBoard);
+  let hitLocation;
+
+  if (playerBoard.potentialTargets.length > 0) {
+    hitLocation = playerBoard.potentialTargets.shift();
+  } else {
+    hitLocation = findValidHitLocation(playerBoard);
+  }
 
   const hit = playerBoard.receiveHit(hitLocation);
 
   if (hit) {
-    if (boards[0].hasLost()) {
+    playerBoard.addAdjacentCells(hitLocation);
+
+    if (playerBoard.hasLost()) {
       endGame(boards[1]);
       return;
     }
     return cpuTurn(boards);
   }
 
+  playerBoard.potentialTargets = [];
   turn = "player";
 };
 
@@ -288,7 +328,10 @@ const findValidHitLocation = (board) => {
 
   do {
     locationToTry = getRandomLocation();
-  } while (board.hitLocations.includes(locationToTry));
+  } while (
+    board.hitLocations.includes(locationToTry) ||
+    board.potentialTargets.includes(locationToTry)
+  );
 
   return locationToTry;
 };
@@ -296,3 +339,9 @@ const findValidHitLocation = (board) => {
 window.onload = () => {
   initialiseStartButton();
 };
+
+//TODO
+
+// IMPROVE CPU AI TO CHECK FOR NEARBY BOATS
+
+// TIMEOUT BETWEEN CPU TURNS
