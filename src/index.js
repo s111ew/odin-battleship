@@ -68,7 +68,8 @@ const createGameBoard = (name) => {
       const locationArray = new Array(shipObject.length);
       locationArray[0] = randomLocation;
       for (let i = 1; i < shipObject.length; i++) {
-        locationArray[i] = randomLocation + (orientation === "V" ? i * 9 : i);
+        locationArray[i] =
+          randomLocation + (orientation === "V" ? i * ROW_SIZE : i);
       }
       if (!this.isLocationValid(locationArray, this.board, orientation)) {
         return this.generateShipLocation(shipObject);
@@ -87,7 +88,7 @@ const createGameBoard = (name) => {
     isLocationValidHorizontal(locationArray, board) {
       const locationStart = locationArray[0];
       const filtered = START_OF_EACH_ROW.filter((num) => num <= locationStart);
-      const rowEnd = Math.max(...filtered) + 8;
+      const rowEnd = Math.max(...filtered) + (ROW_SIZE - 1);
 
       for (let location of locationArray) {
         if (location > rowEnd || board[location] !== 0) {
@@ -202,7 +203,19 @@ const renderHit = (name, index, wasHit) => {
 };
 
 const generateGrids = () => {
-  const gridContainers = document.querySelectorAll(".grid");
+  const main = document.querySelector("main");
+
+  const playerGridContainer = document.createElement("div");
+  playerGridContainer.classList.add("grid");
+  playerGridContainer.classList.add("player-grid");
+  main.appendChild(playerGridContainer);
+
+  const cpuGridContainer = document.createElement("div");
+  cpuGridContainer.classList.add("grid");
+  cpuGridContainer.classList.add("cpu-grid");
+  main.appendChild(cpuGridContainer);
+
+  let gridContainers = [playerGridContainer, cpuGridContainer];
 
   gridContainers.forEach((gridContainer) => {
     for (let i = 0; i < ROW_SIZE * ROW_SIZE; i++) {
@@ -213,12 +226,15 @@ const generateGrids = () => {
   });
 };
 
-const initialiseStartButton = () => {
-  const startButton = document.querySelector(".start");
-  startButton.addEventListener("click", () => {
-    startButton.remove();
-    startGame();
-  });
+const initialiseStart = () => {
+  const onKeyDown = (event) => {
+    if (event.key === "Enter") {
+      startGame();
+      document.removeEventListener("keydown", onKeyDown);
+    }
+  };
+
+  document.addEventListener("keydown", onKeyDown);
 };
 
 const startGame = () => {
@@ -237,15 +253,21 @@ const startGame = () => {
 
 const renderPlayerShips = (boards) => {
   const playerBoard = boards[0];
-
   const playerBoardCells = document.querySelectorAll(".player-grid > div");
-
   playerBoardCells.forEach((cell, index) => {
     const shipAtLocation = playerBoard.checkLocation(index, playerBoard.ships);
     if (shipAtLocation) {
       cell.classList.add(shipAtLocation.shipID);
     }
   });
+
+  // check each ship in playboard.ships array
+  // find first element in playboard.ships.location
+  // if location[0] + 1 === location[1] then ship is horizontal, if not then ship is vertical
+  // if ship is vertical, render ship svg from last ship cell
+  // if ship is horizontal, render svg from first ship cell and rotate 90deg
+  // render ship with absolute position
+  //ship should be constrained width but not height
 };
 
 const addEventListenersToCpuBoard = (boards) => {
@@ -339,9 +361,5 @@ const findValidHitLocation = (board) => {
 };
 
 window.onload = () => {
-  initialiseStartButton();
+  initialiseStart();
 };
-
-//TODO
-
-// TIMEOUT BETWEEN CPU TURNS

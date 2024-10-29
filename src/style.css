@@ -69,11 +69,34 @@ h6 {
 
 /* User Styles Below */
 
+html {
+  background: url(img/world.svg) no-repeat center center fixed;
+  background-color: black;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
 body {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 30px;
+  height: 100%;
+  width: 100%;
+  --accent-color: #2fd1ed;
+  color: var(--accent-color);
+  font-family: monospace;
+  font-size: 16px;
+  overflow: hidden;
+}
+
+.background-grid {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }
 
 main {
@@ -81,36 +104,59 @@ main {
   justify-content: space-between;
 }
 
-.button-container {
-  height: 30px;
+.textbox {
+  border: 0.5px solid var(--accent-color);
+  height: 120px;
+  margin-top: 20px;
+  width: 500px;
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10px 20px;
+}
+
+.space {
+  color: black;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(9, 25px);
-  grid-template-rows: repeat(9, 25px);
-  gap: 2px;
+  grid-template-columns: repeat(9, 40px);
+  grid-template-rows: repeat(9, 40px);
+  height: 362px;
 }
 
 .cpu-grid {
   margin-left: 50px;
 }
 
+.cpu-grid > .cell:not(.miss):not(.hit):hover {
+  cursor: pointer;
+}
+
 .grid > div {
-  border-radius: 3px;
-  background-color: lightgray;
+  background-color: black;
+  border: 0.1px solid var(--accent-color);
+  position: relative;
 }
 
 .cpu-grid > div:hover {
-  background-color: gray;
+  background-color: var(--accent-color);
 }
 
 .hit {
-  background-color: black !important;
+  background-image: url(./img/flame.png);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .miss {
-  background-color: gray !important;
+  background-image: url(./img/waves.svg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .c {
