@@ -138,7 +138,7 @@ main {
 .grid > div {
   background-color: black;
   border: 0.1px solid var(--accent-color);
-  position: relative;
+  /* position: relative; */
 }
 
 .cpu-grid > div:hover {
@@ -159,22 +159,11 @@ main {
   background-position: center;
 }
 
-.c {
-  background-color: red !important;
+.boat-img {
+  position: absolute;
+  width: 40px;
 }
 
-.b {
-  background-color: green !important;
-}
-
-.d {
-  background-color: blue !important;
-}
-
-.s {
-  background-color: blueviolet !important;
-}
-
-.p {
-  background-color: yellow !important;
+.ship-horizontal {
+  transform: rotate(90deg);
 }

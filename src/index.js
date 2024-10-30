@@ -1,4 +1,9 @@
 import "./style.css";
+import carrier from "./img/carrier.svg";
+import battleship from "./img/battleship.svg";
+import destroyer from "./img/destroyer.svg";
+import submarine from "./img/submarine.svg";
+import patrolBoat from "./img/speed-boat.svg";
 
 const ROW_SIZE = 9;
 
@@ -261,13 +266,48 @@ const renderPlayerShips = (boards) => {
     }
   });
 
-  // check each ship in playboard.ships array
-  // find first element in playboard.ships.location
-  // if location[0] + 1 === location[1] then ship is horizontal, if not then ship is vertical
-  // if ship is vertical, render ship svg from last ship cell
-  // if ship is horizontal, render svg from first ship cell and rotate 90deg
-  // render ship with absolute position
-  //ship should be constrained width but not height
+  playerBoard.ships.forEach((ship) => {
+    let startingCell = ship.location[0];
+    let isHorizontal = startingCell + 1 === ship.location[1];
+
+    if (isHorizontal) {
+      placeShipSvg(startingCell, ship.shipID, true);
+    } else {
+      placeShipSvg(startingCell, ship.shipID, false);
+    }
+  });
+};
+
+const placeShipSvg = (startingPosition, shipID, isHorizontal) => {
+  const playerGrid = document.querySelectorAll(".player-grid > div");
+  const cellToPlaceShip = playerGrid[startingPosition];
+
+  const shipSvg = document.createElement("img");
+  shipSvg.classList.add("boat-img");
+
+  switch (shipID) {
+    case "c":
+      shipSvg.src = carrier;
+      break;
+    case "b":
+      shipSvg.src = battleship;
+      break;
+    case "d":
+      shipSvg.src = destroyer;
+      break;
+    case "s":
+      shipSvg.src = submarine;
+      break;
+    case "p":
+      shipSvg.src = patrolBoat;
+      break;
+  }
+
+  if (isHorizontal) {
+    shipSvg.classList.add("ship-horizontal");
+  }
+
+  cellToPlaceShip.appendChild(shipSvg);
 };
 
 const addEventListenersToCpuBoard = (boards) => {
