@@ -76,39 +76,35 @@ html {
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
+  cursor: url(img/cursor.png), auto;
 }
 
 body {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 30px;
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
   --accent-color: #2fd1ed;
   color: var(--accent-color);
   font-family: monospace;
   font-size: 16px;
   overflow: hidden;
+  z-index: -3;
 }
 
-.background-grid {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-main {
+.boxes {
   display: flex;
-  justify-content: space-between;
+  gap: 20px;
 }
 
-.textbox {
+.textbox,
+.infobox {
   border: 0.5px solid var(--accent-color);
   height: 120px;
   margin-top: 20px;
-  width: 500px;
   background-color: black;
   display: flex;
   flex-direction: column;
@@ -116,11 +112,69 @@ main {
   padding: 10px 20px;
 }
 
+.textbox {
+  width: 500px;
+}
+
+.infobox {
+  width: 200px;
+}
+
+.background-grid {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -10;
+}
+
+.grid-container {
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+}
+
+.info-container {
+  display: flex;
+  margin-bottom: 3px;
+}
+
+.player-name {
+  margin-right: 348px;
+  padding: 2px;
+}
+
+.bordered,
+.logo {
+  /* border: 0.5px solid var(--accent-color); */
+  background-color: var(--accent-color);
+  color: black;
+}
+.logo {
+  padding-left: 3px;
+}
+
+.cpu-name {
+  padding: 2px;
+}
+
+main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px 50px 50px 50px;
+  border: 0.5px solid var(--accent-color);
+  background-color: black;
+  z-index: -2;
+}
+
 .space {
   color: black;
 }
 
 .grid {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(9, 40px);
   grid-template-rows: repeat(9, 40px);
@@ -131,25 +185,13 @@ main {
   margin-left: 50px;
 }
 
-.cpu-grid > .cell:not(.miss):not(.hit):hover {
-  cursor: pointer;
-}
-
 .grid > div {
-  background-color: black;
   border: 0.1px solid var(--accent-color);
-  /* position: relative; */
+  position: relative;
 }
 
-.cpu-grid > div:hover {
+.clickable:not(.miss):not(.hit):hover {
   background-color: var(--accent-color);
-}
-
-.hit {
-  background-image: url(./img/flame.png);
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
 }
 
 .miss {
@@ -162,8 +204,136 @@ main {
 .boat-img {
   position: absolute;
   width: 40px;
+  z-index: -1;
 }
 
 .ship-horizontal {
-  transform: rotate(90deg);
+  transform-origin: top;
+  transform: rotate(-90deg) translate(-20px, -20px);
+}
+
+/* Fire Animation */
+
+.fire {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -25%);
+  height: 35px;
+  width: 45px;
+}
+
+.fire .flames {
+  position: absolute;
+  bottom: 40%;
+  left: 50%;
+  width: 60%;
+  height: 60%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.fire .flames .flame {
+  position: absolute;
+  right: 0%;
+  bottom: 0%;
+  width: 0%;
+  height: 0%;
+  background-color: #ffdc01;
+  border-radius: 5px;
+}
+
+/* Flame animation for odd flames */
+.fire .flames .flame:nth-child(2n + 1) {
+  animation: flameodd 1.5s ease-in infinite;
+}
+
+/* Flame animation for even flames */
+.fire .flames .flame:nth-child(2n) {
+  animation: flameeven 1.5s ease-in infinite;
+}
+
+/* Animation delays */
+.fire .flames .flame:nth-child(1) {
+  animation-delay: 0s;
+}
+.fire .flames .flame:nth-child(2) {
+  animation-delay: calc(1.5s / 4);
+}
+.fire .flames .flame:nth-child(3) {
+  animation-delay: calc(1.5s / 4 * 2);
+}
+.fire .flames .flame:nth-child(4) {
+  animation-delay: calc(1.5s / 4 * 3);
+}
+
+@keyframes flameodd {
+  0%,
+  100% {
+    width: 0%;
+    height: 0%;
+  }
+  25% {
+    width: 100%;
+    height: 100%;
+  }
+  0% {
+    background-color: #ffdc01;
+    z-index: 1000000;
+  }
+  40% {
+    background-color: #fdac01;
+    z-index: 1000000;
+  }
+  100% {
+    background-color: #f73b01;
+    z-index: -10;
+  }
+  0% {
+    right: 0%;
+    bottom: 0%;
+  }
+  25% {
+    right: 1%;
+    bottom: 2%;
+  }
+  100% {
+    right: 150%;
+    bottom: 170%;
+  }
+}
+
+@keyframes flameeven {
+  0%,
+  100% {
+    width: 0%;
+    height: 0%;
+  }
+  25% {
+    width: 100%;
+    height: 100%;
+  }
+  0% {
+    background-color: #ffdc01;
+    z-index: 1000000;
+  }
+  40% {
+    background-color: #fdac01;
+    z-index: 1000000;
+  }
+  100% {
+    background-color: #f73b01;
+    z-index: -10;
+  }
+  0% {
+    right: 0%;
+    bottom: 0%;
+  }
+  25% {
+    right: 2%;
+    bottom: 1%;
+  }
+  100% {
+    right: 170%;
+    bottom: 150%;
+  }
 }

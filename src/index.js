@@ -127,6 +127,8 @@ const createGameBoard = (name) => {
 
       const hitShip = this.checkLocation(location, this.ships);
 
+      let oppositePlayer = this.name === "Player" ? "Computer" : "Player";
+
       if (hitShip) {
         hitShip.increaseHits();
 
@@ -139,10 +141,14 @@ const createGameBoard = (name) => {
 
         renderHit(this.name, location, true);
 
+        renderTextUpdate(`${oppositePlayer} fires and hits!`);
+
         return true;
       }
 
       renderHit(this.name, location, false);
+
+      renderTextUpdate(`${oppositePlayer} fires and misses...`);
 
       return false;
     },
@@ -190,35 +196,54 @@ const createGameBoard = (name) => {
 };
 
 const renderHit = (name, index, wasHit) => {
-  const cells = document.querySelectorAll(`.${name}-grid > div`);
+  let activePlayer = name === "Player" ? "player" : "cpu";
 
-  const classToAdd = wasHit ? "hit" : "miss";
+  const cells = document.querySelectorAll(`.${activePlayer}-grid > div`);
 
-  const possibleShipClasses = ["c", "d", "b", "s", "p"];
-
-  if (wasHit) {
-    possibleShipClasses.forEach((shipClass) => {
-      if (cells[index].classList.contains(shipClass)) {
-        cells[index].classList.remove(shipClass);
-      }
-    });
+  if (!wasHit) {
+    cells[index].classList.add("miss");
   }
 
-  cells[index].classList.add(classToAdd);
+  if (wasHit) {
+    cells[index].classList.add("hit");
+    renderFire(cells[index]);
+  }
+};
+
+const renderFire = (cell) => {
+  let parentCell = cell;
+
+  const fire = document.createElement("div");
+  fire.classList.add("fire");
+
+  const flames = document.createElement("div");
+  flames.classList.add("flames");
+  fire.appendChild(flames);
+
+  for (let i = 0; i <= 4; i++) {
+    let flame = document.createElement("div");
+    flame.classList.add("flame");
+    flames.appendChild(flame);
+  }
+
+  parentCell.appendChild(fire);
 };
 
 const generateGrids = () => {
   const main = document.querySelector("main");
 
+  const gridContainer = document.createElement("div");
+  gridContainer.classList.add("grid-container");
+
   const playerGridContainer = document.createElement("div");
   playerGridContainer.classList.add("grid");
   playerGridContainer.classList.add("player-grid");
-  main.appendChild(playerGridContainer);
+  gridContainer.appendChild(playerGridContainer);
 
   const cpuGridContainer = document.createElement("div");
   cpuGridContainer.classList.add("grid");
   cpuGridContainer.classList.add("cpu-grid");
-  main.appendChild(cpuGridContainer);
+  gridContainer.appendChild(cpuGridContainer);
 
   let gridContainers = [playerGridContainer, cpuGridContainer];
 
@@ -229,6 +254,8 @@ const generateGrids = () => {
       gridContainer.appendChild(gridCell);
     }
   });
+
+  main.appendChild(gridContainer);
 };
 
 const initialiseStart = () => {
@@ -243,28 +270,60 @@ const initialiseStart = () => {
 };
 
 const startGame = () => {
+  const main = document.createElement("main");
+  const body = document.querySelector("body");
+  body.appendChild(main);
+
   generateGrids();
-  const playerBoard = createGameBoard("player");
+  renderPlayerInfoBoxes();
+  const playerBoard = createGameBoard("Player");
   playerBoard.generateShips();
 
-  const cpuBoard = createGameBoard("cpu");
+  const cpuBoard = createGameBoard("Computer");
   cpuBoard.generateShips();
 
   let boards = [playerBoard, cpuBoard];
 
   renderPlayerShips(boards);
   addEventListenersToCpuBoard(boards);
+
+  renderTextUpdate("> Player's turn to fire");
+  passTurn();
+  makeCpuBoardClickable();
+};
+
+const renderPlayerInfoBoxes = () => {
+  const main = document.querySelector("main");
+
+  const infoBoxContainer = document.createElement("div");
+  infoBoxContainer.classList.add("info-container");
+
+  const playerInfoBox = document.createElement("div");
+  playerInfoBox.classList.add("player-info");
+
+  const playerName = document.createElement("span");
+  playerName.classList.add("player-name");
+  playerName.textContent = "Player";
+
+  playerInfoBox.appendChild(playerName);
+
+  const cpuInfoBox = document.createElement("div");
+  cpuInfoBox.classList.add("cpu-info");
+
+  const cpuName = document.createElement("span");
+  cpuName.classList.add("cpu-name");
+  cpuName.textContent = "CPU";
+
+  cpuInfoBox.appendChild(cpuName);
+
+  infoBoxContainer.appendChild(playerInfoBox);
+  infoBoxContainer.appendChild(cpuInfoBox);
+
+  main.insertBefore(infoBoxContainer, main.firstChild);
 };
 
 const renderPlayerShips = (boards) => {
   const playerBoard = boards[0];
-  const playerBoardCells = document.querySelectorAll(".player-grid > div");
-  playerBoardCells.forEach((cell, index) => {
-    const shipAtLocation = playerBoard.checkLocation(index, playerBoard.ships);
-    if (shipAtLocation) {
-      cell.classList.add(shipAtLocation.shipID);
-    }
-  });
 
   playerBoard.ships.forEach((ship) => {
     let startingCell = ship.location[0];
@@ -323,6 +382,9 @@ const addEventListenersToCpuBoard = (boards) => {
 const handleClickEvent = (index, boards) => {
   if (turn === "player") {
     let cpuBoard = boards[1];
+    if (cpuBoard.hitLocations.includes(index)) {
+      return;
+    }
     const hit = cpuBoard.receiveHit(index);
     if (boards[1].hasLost()) {
       endGame(boards[0]);
@@ -330,23 +392,81 @@ const handleClickEvent = (index, boards) => {
     }
 
     if (!hit) {
+      makeCpuBoardUnlickable();
+      renderTextUpdate("> Computer's turn to fire");
       turn = "cpu";
+      passTurn();
       cpuTurn(boards);
     }
   }
 };
 
 const endGame = (winningBoard) => {
-  const main = document.querySelector("main");
-  const winningMessage = document.createElement("h1");
-  winningMessage.textContent = `${winningBoard.name} has won!`;
-  main.appendChild(winningMessage);
+  renderTextUpdate(`${winningBoard.name} has won!`);
 
   const cpuBoardCells = document.querySelectorAll(".cpu-grid > div");
   cpuBoardCells.forEach((cell) => {
     const clonedCell = cell.cloneNode(true);
     cell.replaceWith(clonedCell);
   });
+
+  renderTextUpdate(" ");
+  renderTextUpdate("Press [Enter] to play again");
+
+  initialiseRestart();
+};
+
+const makeCpuBoardUnlickable = () => {
+  const cpuBoardCells = document.querySelectorAll(".cpu-grid > div");
+  cpuBoardCells.forEach((cell) => {
+    if (cell.classList.contains("clickable")) {
+      cell.classList.remove("clickable");
+    }
+  });
+};
+
+const makeCpuBoardClickable = () => {
+  const cpuBoardCells = document.querySelectorAll(".cpu-grid > div");
+  cpuBoardCells.forEach((cell) => {
+    if (!cell.classList.contains("clickable")) {
+      cell.classList.add("clickable");
+    }
+  });
+};
+
+const initialiseRestart = () => {
+  const onKeyDown = (event) => {
+    if (event.key === "Enter") {
+      restartGame();
+      document.removeEventListener("keydown", onKeyDown);
+    }
+  };
+
+  document.addEventListener("keydown", onKeyDown);
+};
+
+const restartGame = () => {
+  const main = document.querySelector("main");
+  main.innerHTML = "";
+
+  generateGrids();
+  renderPlayerInfoBoxes();
+  const playerBoard = createGameBoard("Player");
+  playerBoard.generateShips();
+
+  const cpuBoard = createGameBoard("Computer");
+  cpuBoard.generateShips();
+
+  let boards = [playerBoard, cpuBoard];
+
+  renderPlayerShips(boards);
+  addEventListenersToCpuBoard(boards);
+
+  turn = "player";
+  passTurn();
+  makeCpuBoardClickable();
+
+  renderTextUpdate("> Player's turn to fire");
 };
 
 const cpuTurn = (boards) => {
@@ -379,8 +499,11 @@ const cpuTurn = (boards) => {
     }
 
     playerBoard.potentialTargets = [];
+    renderTextUpdate("> Player's turn to fire");
+    makeCpuBoardClickable();
     turn = "player";
-  }, 700);
+    passTurn();
+  }, 1000);
 };
 
 const getRandomLocation = () => {
@@ -400,6 +523,56 @@ const findValidHitLocation = (board) => {
   return locationToTry;
 };
 
+const renderTextUpdate = (message) => {
+  const textBox = document.querySelector(".textbox");
+  const messages = document.querySelectorAll(".textbox > span");
+
+  messages[0].remove();
+
+  const newMessage = document.createElement("span");
+  newMessage.textContent = message;
+
+  textBox.appendChild(newMessage);
+};
+
+const addMouseListeners = () => {
+  const coords = document.querySelector(".coords");
+  window.addEventListener("mousemove", function (event) {
+    const x = ((event.clientX * event.clientX) / 10000).toString().slice(0, 6);
+    const y = ((event.clientY * event.clientY) / 10000).toString().slice(0, 6);
+    coords.textContent = `${x}, ${y}`;
+  });
+};
+
+const liveDate = () => {
+  setInterval(() => {
+    const date = document.querySelector(".datetime");
+
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    const formattedTime = `${hours}:${minutes}:${seconds}`;
+
+    date.textContent = formattedTime;
+  }, 1000);
+};
+
+const passTurn = () => {
+  const playerName = document.querySelector(".player-name");
+  const cpuName = document.querySelector(".cpu-name");
+
+  if (turn === "player") {
+    cpuName.classList.remove("bordered");
+    playerName.classList.add("bordered");
+  } else {
+    playerName.classList.remove("bordered");
+    cpuName.classList.add("bordered");
+  }
+};
+
 window.onload = () => {
+  addMouseListeners();
+  liveDate();
   initialiseStart();
 };
