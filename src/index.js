@@ -373,13 +373,16 @@ const addEventListenersToCpuBoard = (boards) => {
   const cpuBoardCells = document.querySelectorAll(".cpu-grid > div");
 
   cpuBoardCells.forEach((cell, index) => {
-    cell.addEventListener("click", () => {
-      handleClickEvent(index, boards);
+    cell.addEventListener("click", (event) => {
+      handleClickEvent(index, boards, event);
     });
   });
 };
 
-const handleClickEvent = (index, boards) => {
+const handleClickEvent = (index, boards, event) => {
+  if (event.target.classList.contains("miss")) {
+    return;
+  }
   if (turn === "player") {
     let cpuBoard = boards[1];
     if (cpuBoard.hitLocations.includes(index)) {
