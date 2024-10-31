@@ -1,0 +1,8 @@
+<svg width="80px" height="80px" xmlns="http://www.w3.org/2000/svg">
+  <!-- Adjust 'd' path as needed for exact pattern replication -->
+  <path d="M0,10 Q10,20 20,10 T40,10 T60,10 T80,10 T100,10" stroke="#2fd1ed" stroke-width="1.5" fill="none" />
+  <path d="M0,30 Q10,40 20,30 T40,30 T60,30 T80,30 T100,30" stroke="#2fd1ed" stroke-width="1.5" fill="none" />
+  <path d="M0,50 Q10,60 20,50 T40,50 T60,50 T80,50 T100,50" stroke="#2fd1ed" stroke-width="1.5" fill="none" />
+  <path d="M0,70 Q10,80 20,70 T40,70 T60,70 T80,70 T100,70" stroke="#2fd1ed" stroke-width="1.5" fill="none" />
+  <path d="M0,90 Q10,100 20,90 T40,90 T60,90 T80,90 T100,90" stroke="#2fd1ed" stroke-width="1.5" fill="none" />
+</svg>
